@@ -1,0 +1,85 @@
+---
+- name: Start CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: Start CPU&Memory Monitor
+      shell: |
+        . /etc/profile &&
+        nohup bash PATH_TO_ELECT/scripts/status/statsCPU_RAM.sh {{ expName }} {{ stage }} &
+      vars:
+        expName: "SampleExpName"
+        stage: "Compaction"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Monitor before flush
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workload_template"
+        stage: "Before-flush-compaction"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Force flush and compaction
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Force flush
+      shell: |
+        . /etc/profile && cd PATH_TO_ELECT/src/elect && bin/nodetool flush
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until compaction is done
+      pause:
+        seconds: 21600
+
+- name: Stop CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: Stop CPU&Memory Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
+      register: command_result
+      ignore_errors: true
+
+- name: Monitor after flush
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workload_template"
+        stage: "After-flush-compaction"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+

@@ -1,0 +1,54 @@
+Host ccNode1
+    HostName 10.31.0.183
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode2
+    HostName 10.31.0.186
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode3
+    HostName 10.31.0.190
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode4
+    HostName 10.31.0.180
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode5
+    HostName 10.31.0.189
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode6
+    HostName 10.31.0.184
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode7
+    HostName 10.31.0.182
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host ccNode8
+    HostName 10.31.0.188
+    User cc
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes

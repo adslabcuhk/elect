@@ -1,0 +1,65 @@
+---
+- name: Rebuild and start OSS file server
+  hosts: elect_oss
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Rebuild and start OSS file server
+      shell: |
+        . /etc/profile &&
+        bash PATH_TO_ELECT/scripts/run/start-oss.sh
+      register: command_result
+      ignore_errors: True
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until all nodes are ready
+      pause:
+        seconds: 90
+
+- name: Startup with backuped data
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Startup with backuped data
+      command: bash PATH_TO_ELECT/scripts/run/restartNode.sh {{ configureFileDir }} {{ sourceFileDir }}
+      vars:
+        configureFileDir: "PATH_TO_DB_BACKUP/Scheme/DATAPATH/elect.yaml"
+        sourceFileDir: "PATH_TO_DB_BACKUP/Scheme/DATAPATH/data"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until cold startup is done
+      pause:
+        seconds: 90
+
+- name: Setup log levels
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Setup log levels
+      shell: |
+        . /etc/profile && cd PATH_TO_ELECT/src/elect && bin/nodetool setlogginglevel org.apache.cassandra error && bin/nodetool setlogginglevel ROOT error
+      register: command_result
+      ignore_errors: true
+
+
+- name: Reload ELECT logs
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Reload ELECT logs
+      command: bash PATH_TO_ELECT/scripts/run/restartNodeReload.sh
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until startup is done
+      pause:
+        seconds: 5

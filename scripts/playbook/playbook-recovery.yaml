@@ -1,0 +1,86 @@
+---
+- name: Start CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile &&
+        nohup bash PATH_TO_ELECT/scripts/status/statsCPU_RAM.sh {{ expName }} {{ stage }} &
+      vars:
+        expName: "SampleExpName"
+        stage: "Recovery"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Monitor before flush
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workload_template"
+        stage: "Before-Recovery"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Recovery
+  hosts: elect_failure
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Full node recovery
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/run/recovery.sh {{ mode }}
+      vars:
+        mode: "elect"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until recovery is done
+      pause:
+        seconds: 300
+
+- name: Stop CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
+      register: command_result
+      ignore_errors: true
+
+- name: Monitor after flush
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workload_template"
+        stage: "After-Recovery"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"

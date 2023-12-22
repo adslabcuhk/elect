@@ -1,0 +1,182 @@
+---
+- name: Rebuild and start OSS file server
+  hosts: elect_oss
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Rebuild and start OSS file server
+      shell: |
+        . /etc/profile &&
+        bash PATH_TO_ELECT/scripts/run/start-oss.sh
+      register: command_result
+      ignore_errors: True
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until all nodes are ready
+      pause:
+        seconds: 90
+
+- name: Rebuild and start Cassandra servers
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Execute script start-server.sh
+      shell: |
+        . /etc/profile &&
+        bash PATH_TO_ELECT/scripts/run/start-server.sh {{ treeLevels }} {{ initialDelay }} {{ target_saving }} {{ data_block_num }} {{ parity_block_num }} {{ mode }}
+      vars:
+        treeLevels: 9
+        initialDelay:  65536
+        target_saving: 0.6
+        data_block_num: 4
+        parity_block_num: 2
+        mode: "elect"
+      register: command_result
+      ignore_errors: True
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until all nodes are ready
+      pause:
+        seconds: 90
+
+- name: Setup log levels
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Setup log levels
+      shell: |
+        . /etc/profile && cd PATH_TO_ELECT/src/elect && bin/nodetool setlogginglevel org.apache.cassandra error && bin/nodetool setlogginglevel ROOT error
+      register: command_result
+      ignore_errors: true
+
+- name: Prepare keyspace and tables for loading
+  hosts: elect_client
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Execute script start-client.sh
+      command: bash PATH_TO_ELECT/scripts/run/start-client.sh {{ coordinator }} {{ mode }}
+      vars:
+        coordinator: "192.168.0.1"
+        mode: "elect"
+      register: command_result
+      ignore_errors: True
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Start CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile &&
+        nohup bash PATH_TO_ELECT/scripts/status/statsCPU_RAM.sh {{ expName }} {{ stage }} > /dev/null 2>&1 &
+      vars:
+        expName: "SampleExpName"
+        stage: "Loading"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Monitor before loading
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workloadLoad"
+        stage: "Before-loading"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Load data
+  hosts: elect_client
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Execute script loadDB.sh
+      command: bash PATH_TO_ELECT/scripts/run/loadDB.sh {{ record_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ keyspace }}
+      vars:
+        record_count: 100000000
+        key_length: 24
+        filed_length: 1000
+        threads: 16
+        workload: "workloadLoad"
+        expName: "SampleExpName"
+        keyspace: "ycsb"
+      register: command_result
+      ignore_errors: True
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until insertion is done
+      pause:
+        seconds: 5
+
+- name: Monitor after loading
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workloadLoad"
+        stage: "After-Loading"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Stop CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
+      register: command_result
+      ignore_errors: true
+
+- name: Backup Logs
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: copy logs
+      command: bash PATH_TO_ELECT/scripts/run/copyLogs.sh {{ record_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ stage }}
+      vars:
+        record_count: 10000000
+        key_length: 24
+        filed_length: 1000
+        threads: 16
+        workload: "workloadLoad"
+        expName: "SampleExpName"
+        stage: "Load"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"

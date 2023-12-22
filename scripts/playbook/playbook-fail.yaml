@@ -1,0 +1,29 @@
+---
+- name: Stop ELECT server for recovery/degraded operations test
+  hosts: elect_failure
+  become: yes
+  become_user: elect
+  tasks:
+    - name: crush server nodes
+      shell: |
+        . /etc/profile && kill -9 $(ps aux | grep CassandraDaemon | grep -v grep | awk 'NR == 1'  | awk {'print $2'})
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+    - name: Wait until killed server is found
+      pause:
+        seconds: 60
+
+- name: Stop CPU&Memory Monitor
+  hosts: elect_failure
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: Stop CPU&Memory Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
+      register: command_result
+      ignore_errors: true

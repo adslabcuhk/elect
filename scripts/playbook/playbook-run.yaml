@@ -1,0 +1,113 @@
+---
+- name: Start CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile &&
+        nohup bash PATH_TO_ELECT/scripts/status/statsCPU_RAM.sh {{ expName }} {{ stage }} &
+      vars:
+        expName: "SampleExpName"
+        stage: "Running"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Monitor before benchmark
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ stage }}
+      vars:
+        expName: "SampleExpName"
+        workload: "workload_template"
+        stage: "Before-run"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Run Normal benchmark
+  hosts: elect_client
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Execute runDB.sh
+      command: bash PATH_TO_ELECT/scripts/run/runDB.sh {{ record_count }} {{ operation_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ keyspace }} {{ consistency }} {{ runningMode }} {{ extraFlag }}
+      vars:
+        record_count: 10000000
+        operation_count: 10000000
+        key_length: 24
+        filed_length: 1000
+        threads: 64
+        workload: "workload_template"
+        expName: "Exp#1-Normal-Run-Cassandra-DATAPATH"
+        keyspace: "ycsb"
+        consistency: "ONE"
+        runningMode: "normal"
+        extraFlag: ""
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Stop CPU&Memory Monitor
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  gather_facts: false
+  tasks:
+    - name: CPU&Memory Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
+      register: command_result
+      ignore_errors: true
+
+- name: Monitor after benchmark
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Monitor
+      shell: |
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
+      vars:
+        expName: "Exp#1-Degraded-Run-Cassandra-DATAPATH"
+        workload: "workload_template"
+        stage: "After-normal-run"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
+
+- name: Backup Logs
+  hosts: elect_servers
+  become: yes
+  become_user: elect
+  tasks:
+    - name: copy logs
+      command: bash PATH_TO_ELECT/scripts/run/copyLogs.sh {{ record_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ stage }}
+      vars:
+        record_count: 10000000
+        key_length: 24
+        filed_length: 1000
+        threads: 64
+        workload: "workload_template"
+        expName: "Exp#1-Normal-Run-Cassandra-DATAPATH"
+        stage: "Run"
+      register: command_result
+      ignore_errors: true
+    - name: Fail the play if the previous command did not succeed
+      fail: msg="the command failed"
+      when: "'FAILED' in command_result.stderr"
