@@ -77,6 +77,8 @@ if [ ${setupMode} == "full" ]; then
     mvn clean package
 
     cd ${PathToColdTier} || exit
+    rm -rf data *.log
+    mkdir -p data
     make clean
     make
 fi

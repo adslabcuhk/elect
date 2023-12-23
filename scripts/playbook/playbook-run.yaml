@@ -25,7 +25,7 @@
   tasks:
     - name: Monitor
       shell: |
-        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ stage }}
+        . /etc/profile && bash PATH_TO_ELECT/scripts/status/statsDB_DISK_NET.sh {{ expName }} {{ workload }} {{ stage }}
       vars:
         expName: "SampleExpName"
         workload: "workload_template"

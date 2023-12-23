@@ -53,7 +53,7 @@
       when: "'FAILED' in command_result.stderr"
     - name: Wait until recovery is done
       pause:
-        seconds: 300
+        seconds: 1200
 
 - name: Stop CPU&Memory Monitor
   hosts: elect_servers

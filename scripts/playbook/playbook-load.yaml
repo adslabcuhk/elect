@@ -6,7 +6,7 @@
   tasks:
     - name: Rebuild and start OSS file server
       shell: |
-        . /etc/profile &&
+        . /etc/profile && bash PATH_TO_ELECT/scripts/run/stop-oss.sh  &&
         bash PATH_TO_ELECT/scripts/run/start-oss.sh
       register: command_result
       ignore_errors: True
@@ -112,12 +112,14 @@
   become_user: elect
   tasks:
     - name: Execute script loadDB.sh
-      command: bash PATH_TO_ELECT/scripts/run/loadDB.sh {{ record_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ keyspace }}
+      command: bash PATH_TO_ELECT/scripts/run/loadDB.sh {{ record_count }} {{ key_length }} {{ filed_length }} {{ threads }} {{ workload }} {{ expName }} {{ keyspace }} {{ target_saving }} {{ data_block_num }}
       vars:
         record_count: 100000000
         key_length: 24
         filed_length: 1000
         threads: 16
+        target_saving: 0.6
+        data_block_num: 4
         workload: "workloadLoad"
         expName: "SampleExpName"
         keyspace: "ycsb"

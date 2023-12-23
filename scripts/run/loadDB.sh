@@ -10,6 +10,8 @@ func() {
     workload=$5
     expName=$6
     keyspace=$7
+    storageSavingTarget=$8
+    codingK=$9
 
     cd ${PathToYCSB} || exit
 
@@ -23,11 +25,11 @@ func() {
         mode="cassandra"
     fi
 
-    file_name="${expName}-Load-Scheme-${mode}-${workload}-KVNumber-${record_count}-KeySize-${key_length}-ValueSize-${field_length}-ClientNumber-${threads}-Time-$(date +%s)"
+    file_name="${expName}-Load-Scheme-${mode}-${workload}-KVNumber-${record_count}-KeySize-${key_length}-ValueSize-${field_length}-CodingK-${codingK}-Saving-${storageSavingTarget}-ClientNumber-${threads}-Time-$(date +%s)"
 
     bin/ycsb.sh load cassandra-cql -p hosts=${NodesList} -p cassandra.keyspace=${keyspace} -p cassandra.tracing="false" -threads ${threads} -s -P workloads/"${workload}" >${PathToELECTResultSummary}/${file_name}.log 2>&1
 }
 
-func "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+func "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
 
 # bin/ycsb.sh load cassandra-cql -p hosts=10.31.0.185 -p cassandra.keyspace=ycsbraw -p cassandra.tracing="false" -threads 32 -s -P workloads/"workloadLoad

@@ -5,8 +5,9 @@ source "${SCRIPT_DIR}/../common.sh"
 
 # Fetch performance data from log files.
 search_dir="./results"
-expName=$1
-scheme=$2
+fetchType=$1
+expName=$2
+scheme=$3
 # runningMode=$3
 # workload=$4
 # recordcount=$5
@@ -16,14 +17,13 @@ scheme=$2
 # threads=$9
 possibleOperationTypeSet=(READ INSERT SCAN UPDATE)
 benchmarkTypeSet=("AverageLatency" "99thPercentileLatency")
-# benchmarkTypeSet=("AverageLatency" "25thPercentileLatency" "50thPercentileLatency" "75thPercentileLatency" "90thPercentileLatency" "99thPercentileLatency")
 
 function calculate {
     values=("$@")
     num_elements=${#values[@]}
 
     if [ $num_elements -eq 1 ]; then
-        echo "Only one round: ${values[0]}"
+        printf "Only one round: %.2f\n" "${values[0]}"
     elif [ $num_elements -lt 5 ]; then
         min=${values[0]}
         max=${values[0]}
@@ -144,15 +144,15 @@ function processRunLogs {
 function processLoadResults {
     declare -A file_dict
     for file in "$search_dir"/*; do
-        if [[ $file =~ ${expName}-Load-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-ClientNumber-([0-9]+)-Time-[0-9]+ ]]; then
-            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, KeySize: ${BASH_REMATCH[3]}, ValueSize: ${BASH_REMATCH[4]}, ClientNumber: ${BASH_REMATCH[5]}"
+        if [[ $file =~ ${expName}-Load-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-CodingK-([0-9]+)-Saving-([0-9]+\.[0-9]+)-ClientNumber-([0-9]+)-Time-[0-9]+ ]]; then
+            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, KeySize: ${BASH_REMATCH[3]}, ValueSize: ${BASH_REMATCH[4]}, Coding K: ${BASH_REMATCH[5]}, Storage saving target: ${BASH_REMATCH[6]}, ClientNumber: ${BASH_REMATCH[7]}"
             file_dict[$key]+="$file "
             # echo "add file $file to category $key"
         fi
     done
 
     for key in "${!file_dict[@]}"; do
-        echo "[Exp info] $key"
+        echo -e "\033[1m\033[34m[Exp info] $key\033[0m"
         IFS=' ' read -r -a normalArray <<<"${file_dict[$key]}"
         processLoadLogs "${normalArray[@]}"
     done
@@ -161,35 +161,58 @@ function processLoadResults {
 function processNormalResults {
     declare -A file_dict
     for file in "$search_dir"/*; do
-        if [[ $file =~ ${expName}-Run-normal-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-ClientNumber-([0-9]+)-Time-[0-9]+ ]]; then
-            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, KeySize: ${BASH_REMATCH[3]}, ValueSize: ${BASH_REMATCH[4]}, ClientNumber: ${BASH_REMATCH[5]}"
+        if [[ $file =~ ${expName}-Run-normal-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-OPNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-ClientNumber-([0-9]+)-Consistency-(ONE|TWO|ALL)((-[^-]+)*)-Time-[0-9]+ ]]; then
+            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, OPNumber: ${BASH_REMATCH[3]}, KeySize: ${BASH_REMATCH[4]}, ValueSize: ${BASH_REMATCH[5]}, ClientNumber: ${BASH_REMATCH[6]}, ConsistencyLevel: ${BASH_REMATCH[7]}, ExtraFlag: ${BASH_REMATCH[8]}"
             file_dict[$key]+="$file "
             # echo "add file $file to category $key"
         fi
     done
 
     for key in "${!file_dict[@]}"; do
-        echo "[Exp info] $key"
+        echo -e "\033[1m\033[34m[Exp info] $key\033[0m"
         IFS=' ' read -r -a normalArray <<<"${file_dict[$key]}"
         processRunLogs "${normalArray[@]}"
     done
 }
 
+# test-Run-degraded-Scheme-elect-workloadScan-KVNumber-600000-OPNumber-60000-KeySize-24-ValueSize-1000-ClientNumber-16-Consistency-ONE-Time-1703254370.log
 function processDegradedResults {
     declare -A file_dict
     for file in "$search_dir"/*; do
-        if [[ $file =~ ${expName}-Run-normal-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-ClientNumber-([0-9]+)-Time-[0-9]+ ]]; then
-            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, KeySize: ${BASH_REMATCH[3]}, ValueSize: ${BASH_REMATCH[4]}, ClientNumber: ${BASH_REMATCH[5]}"
+        if [[ $file =~ ${expName}-Run-degraded-Scheme-${scheme}-workload([^/]+)-KVNumber-([0-9]+)-OPNumber-([0-9]+)-KeySize-([0-9]+)-ValueSize-([0-9]+)-ClientNumber-([0-9]+)-Consistency-(ONE|TWO|ALL)((-[^-]+)*)-Time-[0-9]+ ]]; then
+            key="scheme: ${scheme}, workload: ${BASH_REMATCH[1]}, KVNumber: ${BASH_REMATCH[2]}, OPNumber: ${BASH_REMATCH[3]}, KeySize: ${BASH_REMATCH[4]}, ValueSize: ${BASH_REMATCH[5]}, ClientNumber: ${BASH_REMATCH[6]}, ConsistencyLevel: ${BASH_REMATCH[7]}, ExtraFlag: ${BASH_REMATCH[8]}"
             file_dict[$key]+="$file "
             # echo "add file $file to category $key"
         fi
     done
 
     for key in "${!file_dict[@]}"; do
-        echo "[Exp info] $key"
+        echo -e "\033[1m\033[34m[Exp info] $key\033[0m"
         IFS=' ' read -r -a normalArray <<<"${file_dict[$key]}"
         processRunLogs "${normalArray[@]}"
     done
 }
 
-processNormalResults
+if [ "${fetchType} " == "load " ]; then
+    echo -e "\033[1mResults of Loading data:\033[0m"
+    processLoadResults
+    echo ""
+elif [ "${fetchType} " == "normal " ]; then
+    echo -e "\033[1mResults of benchmark without node failures (normal operations):\033[0m"
+    processNormalResults
+    echo ""
+elif [ "${fetchType} " == "degraded " ]; then
+    echo -e "\033[1mResults of benchmark with node failures (degraded operations):\033[0m"
+    processDegradedResults
+    echo ""
+elif [ "${fetchType} " == "all " ]; then
+    echo -e "\033[1mResults of Loading data:\033[0m"
+    processLoadResults
+    echo ""
+    echo -e "\033[1mResults of benchmark without node failures (normal operations):\033[0m"
+    processNormalResults
+    echo ""
+    echo -e "\033[1mResults of benchmark with node failures (degraded operations):\033[0m"
+    processDegradedResults
+    echo ""
+fi

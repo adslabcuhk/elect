@@ -14,7 +14,7 @@ func() {
 
     dirName="${expName}-Load-${workload}-KVNumber-${recordcount}-KeySize-${keylength}-ValueSize-${valuelength}-ClientNumber-${threads}-Stage-${stage}$(date +%s)-Log"
 
-    cp -r ${PathToELECTPrototype}/logs ${PathToELECTLog}/$dirName
+    cp -r ${PathToELECTPrototype}/logs ${PathToELECTExpDBBackup}/$dirName
 }
 
 func "$1" "$2" "$3" "$4" "$5" "$6" "$7"

@@ -155,16 +155,6 @@ function load {
     sed -i "s/\(threads: \)".*"/threads: ${simulatedClientNumber}/" ${SCRIPT_DIR}/exp/playbook-load.yaml
 
     ansible-playbook -v -i ${PathToScripts}/exp/hosts.ini ${PathToScripts}/exp/playbook-load.yaml
-
-    ## Collect load logs
-    for nodeIP in "${NodesList[@]}"; do
-        echo "Copy loading stats of loading for ${expName}-${targetScheme} back, current working on node ${nodeIP}"
-        if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
-            mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
-        fi
-        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
-        ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
-    done
 }
 
 function flush {
@@ -294,7 +284,7 @@ function runExp {
         if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
             mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
         fi
-        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTLog}/${targetScheme}/${ExpName}-Run-Workload-${workload}-ClientNumber-${simulatedClientNumber}-Consistency-${consistency}-Node-${nodeIP}
+        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Run-Workload-${workload}-ClientNumber-${simulatedClientNumber}-Consistency-${consistency}-Node-${nodeIP}-Time-$(date +%s)
         ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
     done
 
@@ -327,6 +317,18 @@ function loadDataForEvaluation {
     load "${expName}" "${scheme}" "${KVNumber}" "${keylength}" "${fieldlength}" "${simulatedClientNumber}" "${storageSavingTarget}" "${codingK}"
     flush "${expName}" "${scheme}" "${waitFlushCompactionTime}"
     backup "${expName}" "${scheme}" "${KVNumber}" "${keylength}" "${fieldlength}" "${codingK}" "${storageSavingTarget}"
+
+    ## Collect load logs
+    for nodeIP in "${NodesList[@]}"; do
+        echo "Copy loading stats of loading for ${expName}-${targetScheme} back, current working on node ${nodeIP}"
+        if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
+            mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
+        fi
+        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Load-${nodeIP}-Time-$(date +%s)
+        ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
+        ssh ${UserName}@${OSSServerNode} "du -s --bytes ${PathToColdTier}/data > ${PathToELECTLog}/${ExpName}-${targetScheme}-OSSStorage.log"
+        scp ${UserName}@${OSSServerNode}:${PathToELECTLog}/${ExpName}-${targetScheme}-OSSStorage.log ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-OSSStorage.log
+    done
 }
 
 function doEvaluation {
@@ -384,5 +386,5 @@ function recovery {
     ansible-playbook -v -i ${PathToScripts}/exp/hosts.ini ${PathToScripts}/exp/playbook-recovery.yaml
 
     echo "Copy running logs of $targetScheme back form $recoveryNode"
-    scp -r ${UserName}@${recoveryNode}:${PathToELECTPrototype}/logs/recovery.log ${PathToELECTResultSummary}/${targetScheme}/${expName}-Size-${KVNumber}-recovery-Round-${runningRound}-RecoverNode-${recoveryNode}
+    scp -r ${UserName}@${recoveryNode}:${PathToELECTPrototype}/logs/recovery.log ${PathToELECTResultSummary}/${targetScheme}/${expName}-Size-${KVNumber}-recovery-Round-${runningRound}-RecoverNode-${recoveryNode}-Time--$(date +%s).log
 }

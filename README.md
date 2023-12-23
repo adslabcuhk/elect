@@ -298,7 +298,7 @@ bin/ycsb.sh run cassandra-cql -p hosts=${NodesList} -p cassandra.readconsistency
 Please check the system clock of all the nodes in the cluster. The system clock of all the nodes should be synchronized. You can use the following command to synchronize the system clock of all the nodes in the cluster.
 
 ```shell
-sudo date 122109122023 # set the date to  2023-12-20-15:00
+sudo date 122015002023 # set the date to  2023-12-20-15:00
 ```
 
 ### The read operation of ELECT cannot work correctly

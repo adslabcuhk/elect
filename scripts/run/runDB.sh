@@ -47,7 +47,7 @@ keyspace=$8
 consistency=$9
 shift 9
 runningMode=$1
-extraFlags=${2:-}
+extraFlag=${2:-}
 
 cd ${PathToYCSB} || exit
 
