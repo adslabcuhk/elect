@@ -9,8 +9,8 @@ UserName="cc" # The user name of all the previous nodes
 sudoPasswd="" # The sudo password of all the previous nodes; we use this to automatically install the required packages; we assume all the nodes have the same user name.
 PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
 PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup" # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
-PathToELECTLog="/home/${UserName}/ELECTLog" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
-PathToELECTResultSummary="/home/${UserName}/ELECTResules" # The path to the result summary folder for storing the final experiment results; we assume all the nodes have the same path. 
+PathToELECTLog="/home/${UserName}/ELECTLogs" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
+PathToELECTResultSummary="/home/${UserName}/ELECTResults" # The path to the result summary folder for storing the final experiment results; we assume all the nodes have the same path. 
 
 PathToELECTPrototype="${PathToArtifact}/src/elect"
 PathToYCSB="${PathToArtifact}/scripts/ycsb"

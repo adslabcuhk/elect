@@ -6,6 +6,7 @@ setupMode=${1:-"partial"}
 # SSH key-free connection from control node to all nodes
 for nodeIP in "${NodesList[@]}" "${OSSServerNode}" "${ClientNode}"; do
     if [ ${UserName} == "cc" ]; then
+        ssh-keyscan -H ${nodeIP} >>~/.ssh/known_hosts
         scp ~/.ssh/config cc@${nodeIP}:~/.ssh/
         scp ~/.ssh/id_rsa cc@${nodeIP}:~/.ssh/
     else

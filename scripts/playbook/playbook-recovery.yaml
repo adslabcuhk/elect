@@ -36,6 +36,17 @@
       fail: msg="the command failed"
       when: "'FAILED' in command_result.stderr"
 
+- name: Setup log levels
+  hosts: elect_failure
+  become: yes
+  become_user: elect
+  tasks:
+    - name: Setup log levels
+      shell: |
+        . /etc/profile && cd PATH_TO_ELECT/src/elect && bin/nodetool setlogginglevel org.apache.cassandra debug && bin/nodetool setlogginglevel ROOT debug
+      register: command_result
+      ignore_errors: true
+
 - name: Recovery
   hosts: elect_failure
   become: yes

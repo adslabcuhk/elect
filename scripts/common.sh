@@ -326,8 +326,8 @@ function loadDataForEvaluation {
         fi
         scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Load-${nodeIP}-Time-$(date +%s)
         ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
-        ssh ${UserName}@${OSSServerNode} "du -s --bytes ${PathToColdTier}/data > ${PathToELECTLog}/${ExpName}-${targetScheme}-OSSStorage.log"
-        scp ${UserName}@${OSSServerNode}:${PathToELECTLog}/${ExpName}-${targetScheme}-OSSStorage.log ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-OSSStorage.log
+        ssh ${UserName}@${OSSServerNode} "du -s --bytes ${PathToColdTier}/data > ${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log"
+        scp ${UserName}@${OSSServerNode}:${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log
     done
 }
 
@@ -364,9 +364,8 @@ function doEvaluation {
 function recovery {
     expName=$1
     targetScheme=$2
-    recoveryNode=$3
-    KVNumber=$4
-    runningRound=${5,-"1"}
+    KVNumber=$3
+    runningRound=${4,-"1"}
 
     # Make local results directory
     if [ ! -d ${PathToELECTResultSummary}/${targetScheme} ]; then
@@ -376,15 +375,39 @@ function recovery {
     # Copy playbook
     setupNodeInfo hosts.ini
 
+    echo "Check failed nodes"
+    # Variable to store the IPs under [elect_failure]
+    failure_ips=()
+    # Flag to indicate whether the current section is [elect_failure]
+    in_failure_section=false
+    while read -r line; do
+        if [[ "$line" == "[elect_failure]" ]]; then
+            in_failure_section=true
+            continue
+        fi
+        if [[ "$in_failure_section" = true && "$line" == \[*\] ]]; then
+            break
+        fi
+        if [[ "$in_failure_section" = true ]]; then
+            ip=$(echo "$line" | awk -F'=' '{print $2}')
+            failure_ips+=("$ip")
+        fi
+    done <"${PathToScripts}/exp/hosts.ini"
+    # echo "Failed IPs: ${failure_ips[*]}"
+    recoveryNode=${failure_ips[0]}
+    echo "Target recovery node: ${recoveryNode}"
     if [ ${targetScheme} == "cassandra" ]; then
-        sed -i "s/\(mode: \)".*"/mode: raw/" playbook-recovery.yaml
+        sed -i "s/\(mode: \)".*"/mode: cassandra/" ${PathToScripts}/exp/playbook-recovery.yaml
+        sed -i "s/seconds:.*$/seconds: 90/" ${PathToScripts}/exp/playbook-recovery.yaml
     else
-        sed -i "s/\(mode: \)".*"/mode: elect/" playbook-recovery.yaml
+        sed -i "s/\(mode: \)".*"/mode: elect/" ${PathToScripts}/exp/playbook-recovery.yaml
+        sed -i "s/seconds:.*$/seconds: 1200/" ${PathToScripts}/exp/playbook-recovery.yaml
     fi
-    sed -i "s/\(seconds: \)".*"/seconds: 900/" playbook-recovery.yaml
+    sed -i "s/expName:.*$/expName: ${expName}/" ${PathToScripts}/exp/playbook-recovery.yaml
+    sed -i "s/workload:.*$/workload: Recovery-${KVNumber}/" ${PathToScripts}/exp/playbook-recovery.yaml
 
     ansible-playbook -v -i ${PathToScripts}/exp/hosts.ini ${PathToScripts}/exp/playbook-recovery.yaml
 
     echo "Copy running logs of $targetScheme back form $recoveryNode"
-    scp -r ${UserName}@${recoveryNode}:${PathToELECTPrototype}/logs/recovery.log ${PathToELECTResultSummary}/${targetScheme}/${expName}-Size-${KVNumber}-recovery-Round-${runningRound}-RecoverNode-${recoveryNode}-Time--$(date +%s).log
+    scp -r ${UserName}@${recoveryNode}:${PathToELECTPrototype}/logs/recovery.log ${PathToELECTResultSummary}/${expName}-Scheme-${targetScheme}-Size-${KVNumber}-recovery-Round-${runningRound}-RecoverNode-${recoveryNode}-Time-$(date +%s).log
 }

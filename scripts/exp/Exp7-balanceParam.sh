@@ -23,14 +23,28 @@ for scheme in "${schemes[@]}"; do
     for storageSavingTarget in "${storageSavingTargetSet[@]}"; do
         echo "Start experiment of ${scheme} with storage saving target=${storageSavingTarget}"
         # Load data for evaluation
-        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${storageSavingTarget}"
+        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${simulatedClientNumber}" "${storageSavingTarget}"
 
         # Run experiment
         for workload in "${workloads[@]}"; do
             for runningMode in "${runningTypes[@]}"; do
                 # Run experiment
-                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE" "savingTarget-${storageSavingTarget}"
+                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE" "savingTarget=${storageSavingTarget}"
             done
         done
     done
 done
+
+# Generate the summarized results
+for scheme in "${schemes[@]}"; do
+    for storageSavingTarget in "${storageSavingTargetSet[@]}"; do
+        echo "Storage usage of ${scheme} under the erasure coding params k = $erasureCodingK" >>${PathToScripts}/exp/${ExpName}.log
+        ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "4" "${storageSavingTarget}" >>${PathToScripts}/exp/${ExpName}.log
+    done
+done
+
+for scheme in "${schemes[@]}"; do
+    ${PathToScripts}/count/fetchPerformance.sh all "${ExpName}" "${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+done
+
+cat ${PathToScripts}/exp/${ExpName}.log

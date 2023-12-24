@@ -21,7 +21,7 @@ setupNodeInfo ./hosts.ini
 for scheme in "${schemes[@]}"; do
     echo "Start experiment of ${scheme}"
     # Load data for evaluation
-    loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}"
+    loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${simulatedClientNumber}"
 
     # Run experiment
     for workload in "${workloads[@]}"; do

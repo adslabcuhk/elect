@@ -24,27 +24,45 @@ for scheme in "${schemes[@]}"; do
     echo "Start experiment of ${scheme}"
     for keyLength in "${keyLengthSet[@]}"; do
         # Load data for evaluation
-        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${fixedFieldlength}" "${operationNumber}" "${simulatedClientNumber}"
+        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${fixedFieldlength}" "${simulatedClientNumber}"
 
         # Run experiment
         for workload in "${workloads[@]}"; do
             for runningMode in "${runningTypes[@]}"; do
                 # Run experiment
-                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE"
+                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${fixedFieldlength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE"
             done
         done
     done
 
     for valueLength in "${valueLengthSet[@]}"; do
         # Load data for evaluation
-        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${fixedKeylength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}"
+        loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${fixedKeylength}" "${valueLength}" "${simulatedClientNumber}"
 
         # Run experiment
         for workload in "${workloads[@]}"; do
             for runningMode in "${runningTypes[@]}"; do
                 # Run experiment
-                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE"
+                doEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${fixedKeylength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${RunningRoundNumber}" "${runningMode}" "${workload}" "ONE"
             done
         done
     done
 done
+
+# Generate the summarized results
+for scheme in "${schemes[@]}"; do
+    for keyLength in "${keyLengthSet[@]}"; do
+        echo "Storage usage of ${scheme} under key size = ${keyLength} and value size = ${fixedFieldlength}" >>${PathToScripts}/exp/${ExpName}.log
+        ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${fixedFieldlength}" >>${PathToScripts}/exp/${ExpName}.log
+    done
+    for valueLength in "${valueLengthSet[@]}"; do
+        echo "Storage usage of ${scheme} under key size = ${fixedKeylength} and value size = ${valueLength}" >>${PathToScripts}/exp/${ExpName}.log
+        ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${fixedKeylength}" "${valueLength}" >>${PathToScripts}/exp/${ExpName}.log
+    done
+done
+
+for scheme in "${schemes[@]}"; do
+    ${PathToScripts}/count/fetchPerformance.sh all "${ExpName}" "${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+done
+
+cat ${PathToScripts}/exp/${ExpName}.log

@@ -13,9 +13,9 @@
     - name: Fail the play if the previous command did not succeed
       fail: msg="the command failed"
       when: "'FAILED' in command_result.stderr"
-    - name: Wait until all nodes are ready
+    - name: Wait until OSS server is ready
       pause:
-        seconds: 90
+        seconds: 10
 
 - name: Rebuild and start Cassandra servers
   hosts: elect_servers
@@ -38,7 +38,7 @@
     - name: Fail the play if the previous command did not succeed
       fail: msg="the command failed"
       when: "'FAILED' in command_result.stderr"
-    - name: Wait until all nodes are ready
+    - name: Wait until all KVS nodes are ready
       pause:
         seconds: 90
 

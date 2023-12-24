@@ -31,3 +31,15 @@ for scheme in "${schemes[@]}"; do
         done
     done
 done
+
+# Generate the summarized results
+for scheme in "${schemes[@]}"; do
+    echo "Storage usage of ${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+    ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>${PathToScripts}/exp/${ExpName}.log
+done
+
+for scheme in "${schemes[@]}"; do
+    ${PathToScripts}/count/fetchPerformance.sh all "${ExpName}" "${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+done
+
+cat ${PathToScripts}/exp/${ExpName}.log

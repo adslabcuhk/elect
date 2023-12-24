@@ -13,9 +13,9 @@
     - name: Fail the play if the previous command did not succeed
       fail: msg="the command failed"
       when: "'FAILED' in command_result.stderr"
-    - name: Wait until all nodes are ready
+    - name: Wait until OSS server is ready
       pause:
-        seconds: 90
+        seconds: 10
 
 - name: Startup with backuped data
   hosts: elect_servers
