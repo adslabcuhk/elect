@@ -21,12 +21,12 @@ As a distributed KV store, ELECT requires a cluster of machines to run. With the
 
 * For Java project build: openjdk-11-jdk, openjdk-11-jre, ant, ant-optional Maven.
 * For erasure-coding library build: clang, llvm, libisal-dev.
-* For scripts: python3, ansible, python3-pip, cassandra-driver, numpy, scipy.
+* For scripts: python3, ansible, python3-pip, cassandra-driver, bc, numpy, scipy.
 
 The packages above can be directly installed via `apt-get` and `pip` package managers:
 
 ```shell 
-sudo apt-get install openjdk-11-jdk openjdk-11-jre ant ant-optional maven clang llvm libisal-dev python3 ansible python3-pip
+sudo apt-get install -y openjdk-11-jdk openjdk-11-jre ant ant-optional maven clang llvm libisal-dev python3 ansible python3-pip bc
 pip install cassandra-driver numpy scipy
 ```
 

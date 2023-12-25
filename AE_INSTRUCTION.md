@@ -5,14 +5,14 @@ Here are the detailed instructions to perform the same experiments in our paper.
 
 ## Artifact claims
 
-We claim that the resultant numbers might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect ELECT to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
+We claim that the results might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect ELECT to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
 
 * We require a single client node, six server nodes, and one storage node (as the cold tier) in AE.
 * We replaced the Alibaba OSS with a server node within the same cluster as the cold tier to store the cold data.
 
 ## Testbed access
 
-We provide a testbed on the Chameleon cloud for the evaluation with a properly set environment. The testbed contains 8 machines (6 ELECT server nodes, 1 object storage server node, and 1 client node). Since the repo will be made public, in order to ensure data security, we will provide the connection key on the HotCRP website. You can access the testbed via the following command:
+We provide a testbed on the Chameleon cloud for the evaluation with an adequately set environment. The testbed contains 8 machines (6 ELECT server nodes, 1 object storage server node, and 1 client node). Since the repo will be made public, we will provide the connection key on the HotCRP website to ensure data security. You can access the testbed via the following command:
 
 ```shell
 echo "${SSH-key-content}" > ~/.ssh/cc_rsa # Please replace the ${SSH-key-content} with the content of the SSH key that we provide on the HotCRP website.
@@ -20,7 +20,7 @@ chmod 600 ~/.ssh/cc_rsa
 ssh -i ~/.ssh/cc_rsa cc@129.114.109.228
 ```
 
-Alternatively, we also provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. We will provide the account and password on the HotCRP website. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
+Alternatively, we provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. We will provide the account and password on the HotCRP website. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
 
 ```shell
 ssh -p 2216 yjren@projgw.cse.cuhk.edu.hk
@@ -39,7 +39,7 @@ cd /mnt/ssd/ELECT # For CUHK CSE testbed
 
 We provide scripts to set up the environment for the evaluation. The scripts are tested on Ubuntu 22.04 LTS. Note that the running time of the scripts depends on the node number, network bandwidth, and the performance of the cluster nodes.
 
-**Step 1:** Set up and check the user account and sudo password on each node. We assume all the nodes have the same username and password. We use the user name and password to set up the running environment automatically. In addition, please also check whether each node has the same network interface name (for the given IP address). If not, please modify the `networkInterface` variable in `scripts/settings.sh` on each node.
+**Step 1:** Set up and check each node's user account and sudo password. We assume all the nodes have the same username and password. We use the user name and password to set up the running environment automatically. 
 
 **Step 2:** Set up the cluster node info in `scripts/settings.sh` on each node. Please fill in the following variables in the script. Note that we assume all the nodes have the same configurations (e.g., same user name, same path to the artifact folder, same network interface name, etc.).
 
@@ -49,7 +49,7 @@ OSSServerNode="10.31.0.190" # The IP address of the OSS server node
 OSSServerPort=8000 # The port number of the OSS server node
 ClientNode="10.31.0.187" # The IP address of the client node (it can be the local node running the scripts)
 UserName="cc" # The user name of all the previous nodes
-sudoPasswd="" # The sudo password of all the previous nodes; we use this to automatically install the required packages; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
+sudoPasswd="" # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
 PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
 PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup" # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
 PathToELECTLog="/home/${UserName}/ELECTLog" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
@@ -79,9 +79,11 @@ find . -type f -name "*.sh" -exec chmod +x {} \;
 
 ### Note on the evaluation results
 
-The summarized result of each evaluation will be stored in the `scripts/exp/` folder and named `${ExpName}.log`. For example, the result of Exp#1 will be stored in `scripts/exp/Exp1-ycsb.log`.
+The raw running log generated by the YCSB benchmark tool will be stored in the folder `${PathToELECTResultSummary}/` configured in the `scripts/settings.sh` file. The log file will be named with detailed configuration information, such as workload, KV number, operation number, etc.
 
-For the performance evaluation, the result will be summarized in different ways according to the running round number of the experiment (defined in each of the experiment scripts by the variable `RunningRoundNumber`). 
+To make the result easier to read, we provide the summarized result of each evaluation in the `scripts/exp/` folder and named `${ExpName}.log`. For example, the result of Exp#1 will be stored in `scripts/exp/Exp1-ycsb.log`.
+
+For the **performance evaluation**, the result will be summarized in different ways according to the running round number of the experiment (defined in each of the experiment scripts by the variable `RunningRoundNumber`). 
 
 * If the running round number is 1, the result will be directly output as in the example shown below.
 
@@ -95,7 +97,7 @@ Only one round: 1369.53
 Only one round: 1883.00
 ```
 
-* If the running round number is between 1 and 5, the result will be output with the average, maximum, and minimum as the example shown below.
+* If the running round number is between 1 and 5, the result will be output with the average, maximum, and minimum, as shown in the example below.
 
 ```shell
 [Exp info] scheme: elect, workload: Write, KVNumber: 600000, OPNumber: 60000, KeySize: 24, ValueSize: 1000, ClientNumber: 16, ConsistencyLevel: ONE, ExtraFlag: 
@@ -119,20 +121,22 @@ Average: 465.35; The 95% confidence interval: (452.85, 477.85)
 Average: 1623.00; The 95% confidence interval: (1553.32, 1692.68)
 ```
 
-For the storage overhead evaluation, the result will be summarized based on the total, hot-tier, and cold-tier storage overhead. For example:
+For the **storage overhead evaluation**, the result will be summarized based on the total, hot-tier, and cold-tier storage overhead. For example:
 
 ```shell
-[Exp info] scheme: elect, KVNumber: 100000000, KeySize: 24, ValueSize: 1000
-Total storage overhead (unit: GB): 185.90
-Hot-tier storage overhead (unit: GB): 134.10
-Cold-tier storage overhead (unit: GB): 51.80
+[Exp info] Scheme: elect, KVNumber: 100000000, KeySize: 24, ValueSize: 1000
+Total storage overhead (unit: GiB): 185.90
+Hot-tier storage overhead (unit: GiB): 134.10
+Cold-tier storage overhead (unit: GiB): 51.80
 ```
+
+For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized similarly to the summarized performance results. Again, depending on the number of running rounds conducted, the output formats include options such as a single-round summary (run experiment with one round) or more comprehensive data sets featuring average, maximum, and minimum values (run experiment with 2~4 rounds), as well as average values with a 95% Student-T distribution confidence interval (run experiment more than five rounds). We provide examples of the summarized results of operation breakdown, recovery time cost, and resource usage in each related evaluation.
 
 ### Overall system analysis (Exp#1~5 in our paper)
 
 #### Exp#1: Performance with YCSB core workloads (1 human minutes + ~ 20 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp1-ycsb.sh
@@ -140,7 +144,7 @@ bash scripts/exp/Exp1-ycsb.sh
 
 #### Exp#2: Micro-benchmarks on KV operations (1 human-minutes + ~ 5 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp2-operations.sh
@@ -148,33 +152,88 @@ bash scripts/exp/Exp2-operations.sh
 
 #### Exp#3: Performance breakdown (1 human-minutes + ~ 5 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp3-breakdown.sh
 ```
 
+*Results:* These summaries are available in the `scripts/exp/` directory and can be found in the file named `Exp3-breakdown.log`. For example, the write operation breakdown result of ELECT will be output as in the example shown below. Note that the title for each metric is the same as the title in the paper.
+
+```shell
+[Breakdown info for Write] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
+WAL (unit: ms/MiB):
+Only one round: 388.95
+MemTable (unit: ms/MiB):
+Only one round: 686.65
+Flushing (unit: ms/MiB):
+Only one round: 200.79
+Compaction (unit: ms/MiB):
+Only one round: 1638.06
+Transitioning (unit: ms/MiB):
+Only one round: 259.84
+Migration (unit: ms/MiB):
+Only one round: 17.72
+...
+```
+
 #### Exp#4: Full-node recovery (1 human-minutes + ~ 14 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp4-recovery.sh
 ```
 
+*Results:* These summaries are available in the `scripts/exp/` directory and can be found in the file named `Exp4-recovery.log`.
+
+* For ELECT, the recovery time is the time cost of retrieving the LSM-trees from the replication nodes and decoding the SSTables. The result will be output as in the example shown below.
+
+```shell
+[Exp info] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
+Total recovery time cost (unit: s):
+Average: 6653.00, Min: 6653, Max: 6653
+Recovery time cost for retrieve LSM-trees (unit: s):
+Average: 3442.00, Min: 3442, Max: 3442
+Recovery time cost for decode SSTables (unit: s):
+Average: 3211.00, Min: 3211, Max: 3211
+```
+
+* For Cassandra, the recovery time is the time cost of retrieving the SSTables from the replication only. The result will be output as in the example shown below.
+    
+```shell
+[Exp info] scheme: cassandra, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
+Total recovery time cost (unit: s):
+Only one round: 7515.00
+```
+
 #### Exp#5: Resource usage (1 human-minutes + ~ 5 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp5-resource.sh
+```
+
+*Results:* We summarize resource utilization as the 95th percentile of CPU usage, the 95th percentile of total memory overhead, total disk I/O, and total network overhead (bidirectional). In particular, we obtain the 95% percentile CPU usage based on the sum of the CPU usage of all nodes with the same timestamp and then calculate the average usage of each core (i.e., total usage/total number of cores). Therefore, the CPU usage results will be significantly affected by the differences in hardware configurations of different testbeds. The results will be output as in the example shown below.
+
+```shell
+[Resource usage with degraded operations] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000, OPNumber: 600000
+95%-percentile CPU Usage (%):
+Only one round: 1.19
+95%-percentile RAM Usage (GiB):
+Only one round: 22.98
+Total Disk I/O (GiB):
+Only one round: 1.08
+Total Network traffic (GiB):
+Only one round: 202.38
 ```
 
 ### Parameter analysis (Exp#6~8 in our paper)
 
 #### Exp#6: Impact of key and value sizes (1 human-minutes + ~ 40 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp6-kvSize.sh
@@ -182,7 +241,7 @@ bash scripts/exp/Exp6-kvSize.sh
 
 #### Exp#7: Impact of storage-saving target (1 human-minutes + ~ 45 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp7-balanceParam.sh
@@ -190,9 +249,9 @@ bash scripts/exp/Exp7-balanceParam.sh
 
 #### Exp#8: Impact of erasure coding parameters (1 human-minutes + ~ 12 compute-hours)
 
-The original experiment requires at least 12 nodes (1 client node, 10 server nodes, and 1 storage node). For the provided testbeds, limited by the number of available nodes, we adapt the changing range of erasure code K from 4~8 to 2~4. This result is only used to verify ELECT's adaptability to different K values.
+The original experiment requires at least 12 nodes (1 client node, 10 server nodes, and 1 storage node). For the provided testbeds, limited by the number of available nodes, we adapt the changing range of erasure code K from 4~8 to 2~4. This result only verifies ELECT's adaptability to different K values.
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp8-ecParam.sh
@@ -202,7 +261,7 @@ bash scripts/exp/Exp8-ecParam.sh
 
 #### Exp#9: Impact of read consistency level (1 human-minutes + ~ 5 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp9-consistency.sh
@@ -210,7 +269,7 @@ bash scripts/exp/Exp9-consistency.sh
 
 #### Exp#10: Impact of number of clients (1 human minutes + ~ 5 compute-hours)
 
-* Running:
+*Running:*
 
 ```shell
 bash scripts/exp/Exp10-clients.sh

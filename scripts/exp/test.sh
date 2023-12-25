@@ -8,10 +8,10 @@ ExpName="test"
 schemes=("elect" "cassandra")
 workloads=("workloadRead" "workloadWrite" "workloadScan" "workloadUpdate")
 runningTypes=("normal" "degraded")
-KVNumber=600000
+KVNumber=10000000
 keyLength=24
 valueLength=1000
-operationNumber=60000
+operationNumber=1000000
 simulatedClientNumber=${defaultSimulatedClientNumber}
 RunningRoundNumber=1
 
@@ -32,3 +32,25 @@ for scheme in "${schemes[@]}"; do
     done
 done
 
+# Generate the summarized results
+if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
+    rm -rf "${PathToScripts}/exp/${ExpName}.log"
+fi
+# output resource usage
+outputTypeSet=("Load" "normal" "degraded")
+for scheme in "${schemes[@]}"; do
+    for outputType in "${outputTypeSet[@]}"; do
+        ${PathToScripts}/count/fetchResource.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${outputType}" "ONE" "4" "0.6" "${workloads[@]}" >>${PathToScripts}/exp/${ExpName}.log
+    done
+done
+# output storage usage
+for scheme in "${schemes[@]}"; do
+    echo "Storage usage of ${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+    ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>${PathToScripts}/exp/${ExpName}.log
+done
+# output performance
+for scheme in "${schemes[@]}"; do
+    ${PathToScripts}/count/fetchPerformance.sh all "${ExpName}" "${scheme}" >>${PathToScripts}/exp/${ExpName}.log
+done
+
+cat ${PathToScripts}/exp/${ExpName}.log

@@ -84,7 +84,7 @@
       vars:
         expName: "Exp#1-Degraded-Run-Cassandra-DATAPATH"
         workload: "workload_template"
-        stage: "After-normal-run"
+        stage: "After-run"
       register: command_result
       ignore_errors: true
     - name: Fail the play if the previous command did not succeed

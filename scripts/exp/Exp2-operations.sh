@@ -33,6 +33,10 @@ for scheme in "${schemes[@]}"; do
 done
 
 # Generate the summarized results
+if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
+    rm -rf "${PathToScripts}/exp/${ExpName}.log"
+fi
+
 for scheme in "${schemes[@]}"; do
     echo "Storage usage of ${scheme}" >>${PathToScripts}/exp/${ExpName}.log
     ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>${PathToScripts}/exp/${ExpName}.log

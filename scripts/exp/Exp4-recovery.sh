@@ -25,3 +25,16 @@ for scheme in "${schemes[@]}"; do
         recovery "${ExpName}" "${scheme}" "${KVNumber}" "${RunningRoundNumber}"
     done
 done
+
+# Fetch results
+if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
+    rm -rf "${PathToScripts}/exp/${ExpName}.log"
+fi
+
+for scheme in "${schemes[@]}"; do
+    for KVNumber in "${KVNumberSet[@]}"; do
+        bash "${PathToScripts}/count/fetchRecovery.sh" "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>"${PathToScripts}/exp/${ExpName}.log"
+    done
+done
+
+cat "${PathToScripts}/exp/${ExpName}.log"

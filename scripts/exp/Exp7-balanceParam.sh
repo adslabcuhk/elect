@@ -36,6 +36,10 @@ for scheme in "${schemes[@]}"; do
 done
 
 # Generate the summarized results
+if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
+    rm -rf "${PathToScripts}/exp/${ExpName}.log"
+fi
+
 for scheme in "${schemes[@]}"; do
     for storageSavingTarget in "${storageSavingTargetSet[@]}"; do
         echo "Storage usage of ${scheme} under the erasure coding params k = $erasureCodingK" >>${PathToScripts}/exp/${ExpName}.log

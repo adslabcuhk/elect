@@ -271,7 +271,7 @@ function runExp {
     sed -i "s/\(consistency: \)".*"/consistency: ${consistency}/" ${PathToScripts}/exp/playbook-run.yaml
     sed -i "s/\(runningMode: \)".*"/runningMode: ${runningMode}/" ${PathToScripts}/exp/playbook-run.yaml
     sed -i "s/\(extraFlag: \)".*"/extraFlag: ${extraFlag}/" ${PathToScripts}/exp/playbook-run.yaml
-    if [ "${workload}" == "workloade" ] || [ "${workload}" == "workloadscan" ]; then
+    if [ "${workload}" == "workloade" ] || [ "${workload}" == "workloadScan" ]; then
         # generate scanNumber = operationNumber / 10
         scanNumber=$((operationNumber / 10))
         sed -i "s/operation_count:.*$/operation_count: ${scanNumber}/" ${PathToScripts}/exp/playbook-run.yaml
@@ -284,7 +284,7 @@ function runExp {
         if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
             mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
         fi
-        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Run-Workload-${workload}-ClientNumber-${simulatedClientNumber}-Consistency-${consistency}-Node-${nodeIP}-Time-$(date +%s)
+        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Run-${runningType}-Workload-${workload}-KVNumber-${KVNumber}-OPNumber-${operationNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-ClientNumber-${simulatedClientNumber}-Consistency-${consistency}-Node-${nodeIP}-Time-$(date +%s)
         ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
     done
 
@@ -324,7 +324,7 @@ function loadDataForEvaluation {
         if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
             mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
         fi
-        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Load-${nodeIP}-Time-$(date +%s)
+        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Load-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-Node-${nodeIP}-Time-$(date +%s)
         ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
         ssh ${UserName}@${OSSServerNode} "du -s --bytes ${PathToColdTier}/data > ${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log"
         scp ${UserName}@${OSSServerNode}:${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log

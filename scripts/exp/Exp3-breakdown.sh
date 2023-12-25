@@ -6,13 +6,13 @@ source "${SCRIPT_DIR}/../common.sh"
 
 ExpName="Exp3-breakdown"
 schemes=("cassandra" "elect")
-workloads=("workloadRead" "workloadWrite" "workloadScan" "workloadUpdate")
+workloads=("workloadRead")
 runningTypes=("normal" "degraded")
 KVNumber=10000000
 keyLength=24
 valueLength=1000
 operationNumber=1000000
-simulatedClientNumber=1
+simulatedClientNumber=${defaultSimulatedClientNumber}
 RunningRoundNumber=1
 
 # Setup hosts
@@ -33,3 +33,16 @@ for scheme in "${schemes[@]}"; do
 done
 
 # Generate the summarized results
+if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
+    rm -rf "${PathToScripts}/exp/${ExpName}.log"
+fi
+
+outputTypeSet=("write" "normal" "degraded")
+for scheme in "${schemes[@]}"; do
+    echo "Breakdown of ${scheme}" >>"${PathToScripts}/exp/${ExpName}.log"
+    for outputType in "${outputTypeSet[@]}"; do
+        ${PathToScripts}/count/fetchBreakdown.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${operationNumber}" "${simulatedClientNumber}" "${outputType}" "ONE" >> ${PathToScripts}/exp/${ExpName}.log
+    done
+done
+
+cat ${PathToScripts}/exp/${ExpName}.log

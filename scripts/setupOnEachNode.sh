@@ -20,10 +20,28 @@ if [ ${setupMode} == "full" ]; then
         done
     fi
 
+    if [ ! -d "${PathToELECTExpDBBackup}" ]; then
+        mkdir -p ${PathToELECTExpDBBackup}
+    else
+        rm -rf ${PathToELECTExpDBBackup}/*
+    fi
+
+    if [ ! -d "${PathToELECTLog}" ]; then
+        mkdir -p ${PathToELECTLog}
+    else
+        rm -rf ${PathToELECTLog}/*
+    fi
+
+    if [ ! -d "${PathToELECTResultSummary}" ]; then
+        mkdir -p ${PathToELECTResultSummary}
+    else
+        rm -rf ${PathToELECTResultSummary}/*
+    fi
+
     # Install packages
     if [ ! -z "${sudoPasswd}" ]; then
         printf ${sudoPasswd} | sudo -S apt-get update
-        printf ${sudoPasswd} | sudo -S apt-get install -y ant ant-optional maven clang llvm python3 ansible python3-pip libisal-dev openjdk-11-jdk openjdk-11-jre
+        printf ${sudoPasswd} | sudo -S apt-get install -y ant ant-optional maven clang llvm python3 ansible python3-pip libisal-dev openjdk-11-jdk openjdk-11-jre bc
         # Disable automatically time setup
         if systemctl is-active --quiet ntpd; then
             echo "Stopping ntpd..."
@@ -52,7 +70,7 @@ if [ ${setupMode} == "full" ]; then
         printf ${sudoPasswd} | sudo -S timedatectl set-time "$TIME"
     else
         sudo apt-get update
-        sudo apt-get install -y ant ant-optional maven clang llvm python3 ansible python3-pip libisal-dev openjdk-11-jdk openjdk-11-jre
+        sudo apt-get install -y ant ant-optional maven clang llvm python3 ansible python3-pip libisal-dev openjdk-11-jdk openjdk-11-jre bc
         # Disable automatically time setup
         if systemctl is-active --quiet ntpd; then
             echo "Stopping ntpd..."
