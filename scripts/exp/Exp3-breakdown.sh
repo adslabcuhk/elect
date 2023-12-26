@@ -37,7 +37,7 @@ if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
     rm -rf "${PathToScripts}/exp/${ExpName}.log"
 fi
 
-outputTypeSet=("write" "normal" "degraded")
+outputTypeSet=("Load" "normal" "degraded")
 for scheme in "${schemes[@]}"; do
     echo "Breakdown of ${scheme}" >>"${PathToScripts}/exp/${ExpName}.log"
     for outputType in "${outputTypeSet[@]}"; do

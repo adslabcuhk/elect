@@ -2,7 +2,7 @@
 . /etc/profile
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/../common.sh"
-PathToELECTResultSummary=${PathToScripts}/count/results
+# PathToELECTResultSummary=${PathToScripts}/count/results
 
 expName=$1
 targetScheme=$2
@@ -37,7 +37,9 @@ function calculate {
             sum=$(echo "$sum + $i" | bc -l)
         done
         avg=$(echo "scale=2; $sum / $num_elements" | bc -l)
-        echo "Average: $avg, Min: $min, Max: $max"
+        min_formatted=$(printf "%.2f" $min)
+        max_formatted=$(printf "%.2f" $max)
+        echo "Average: $avg, Min: $min_formatted, Max: $max_formatted"
     elif [ $num_elements -ge 5 ]; then
         values_csv=$(printf ",%.2f" "${values[@]}")
         values_csv=${values_csv:1}

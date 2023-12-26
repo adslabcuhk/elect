@@ -1,4 +1,3 @@
-
 # Instructions to reproduce the evaluations of the paper
 
 Here are the detailed instructions to perform the same experiments in our paper.
@@ -64,9 +63,7 @@ bash scripts/setup.sh full
 
 ## Evaluations
 
-This section describes how to reproduce the evaluations in our paper. The total running time to reproduce all evaluation results is about 7~8 days.
-
-To simplify the reproduction process, we provide an `Ansible`-based script to run all the experiments. The script will automatically run the experiments and generate the result logs. The scripts will take about 9~10 days to finish all the experiments. **We suggest running the scripts of Exp#2 first, which can reproduce the main results (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update) of our paper**.
+This section describes how to reproduce the evaluations in our paper. To simplify the reproduction process, we provide Ansible-based scripts to run all the experiments. The script will automatically run the experiments and generate the result logs. The scripts will take about 9~10 days to finish all the experiments. **We suggest running the scripts of Exp#0 first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update)**.
 
 ### Note on the experiment scripts
 
@@ -131,6 +128,33 @@ Cold-tier storage overhead (unit: GiB): 51.80
 ```
 
 For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized similarly to the summarized performance results. Again, depending on the number of running rounds conducted, the output formats include options such as a single-round summary (run experiment with one round) or more comprehensive data sets featuring average, maximum, and minimum values (run experiment with 2~4 rounds), as well as average values with a 95% Student-T distribution confidence interval (run experiment more than five rounds). We provide examples of the summarized results of operation breakdown, recovery time cost, and resource usage in each related evaluation.
+
+### Simple experiment (For quick verification)
+
+#### Exp#0: Simple experiment (1 human-minutes + ~ 10 compute-hours)
+
+We provide this simple experiment to verify our main experimental results quickly: ELECT provides similar performance compared to Cassandra while significantly reducing hot-tier storage overhead. Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
+
+You can run this simple experiment via the following command:
+
+```shell
+bash scripts/exp/Exp0-simpleOverall.sh
+```
+
+The results will be output in the order shown below. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+
+```shell
+The storage overhead results:
+...
+The performance evaluation results:
+...
+The operation breakdown evaluation results:
+...
+The full-node recovery time cost results:
+...
+The resource usage evaluation results:
+...
+```
 
 ### Overall system analysis (Exp#1~5 in our paper)
 

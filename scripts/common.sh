@@ -19,6 +19,21 @@ function generate_tokens {
     echo ${tokens[*]}
 }
 
+function resetPlaybook {
+    # Setup user ID for each playbook
+    for playbook in "${playbookSet[@]}"; do
+        if [ ! -f ${playbook} ]; then
+            cp ${SCRIPT_DIR}/playbook/${playbook} ${SCRIPT_DIR}/exp/${playbook}
+        else
+            rm -rf ${SCRIPT_DIR}/exp/${playbook}
+            cp ${SCRIPT_DIR}/playbook/${playbook} ${SCRIPT_DIR}/exp/${playbook}
+        fi
+        sed -i "s/\(become_user: \)".*"/become_user: ${UserName}/" ${SCRIPT_DIR}/exp/${playbook}
+        sed -i "s|PATH_TO_ELECT|${PathToArtifact}|g" ${SCRIPT_DIR}/exp/${playbook}
+        sed -i "s|PATH_TO_DB_BACKUP|${PathToELECTExpDBBackup}|g" ${SCRIPT_DIR}/exp/${playbook}
+    done
+}
+
 function setupNodeInfo {
     targetHostInfo=$1
     if [ -f ${SCRIPT_DIR}/exp/${targetHostInfo} ]; then
@@ -41,17 +56,7 @@ function setupNodeInfo {
     echo "server${failure_nodes} ansible_host=${NodesList[(($failure_nodes - 1))]}" >>${SCRIPT_DIR}/exp/${targetHostInfo}
 
     # Setup user ID for each playbook
-    for playbook in "${playbookSet[@]}"; do
-        if [ ! -f ${playbook} ]; then
-            cp ${SCRIPT_DIR}/playbook/${playbook} ${SCRIPT_DIR}/exp/${playbook}
-        else
-            rm -rf ${SCRIPT_DIR}/exp/${playbook}
-            cp ${SCRIPT_DIR}/playbook/${playbook} ${SCRIPT_DIR}/exp/${playbook}
-        fi
-        sed -i "s/\(become_user: \)".*"/become_user: ${UserName}/" ${SCRIPT_DIR}/exp/${playbook}
-        sed -i "s|PATH_TO_ELECT|${PathToArtifact}|g" ${SCRIPT_DIR}/exp/${playbook}
-        sed -i "s|PATH_TO_DB_BACKUP|${PathToELECTExpDBBackup}|g" ${SCRIPT_DIR}/exp/${playbook}
-    done
+    resetPlaybook
 }
 
 function treeSizeEstimation {
@@ -125,7 +130,7 @@ function load {
     fi
 
     # Generate playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
     dataSizeOnEachNode=$(dataSizeEstimation ${KVNumber} ${keylength} ${fieldlength})
     initialDelayTime=$(initialDelayEstimation ${dataSizeOnEachNode} ${targetScheme})
     treeLevels=$(treeSizeEstimation ${KVNumber} ${keylength} ${fieldlength})
@@ -168,7 +173,7 @@ function flush {
     fi
 
     # Copy playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
     # Modify playbook
     sed -i "s/\(expName: \)".*"/expName: "${ExpName}-${targetScheme}-Load"/" ${PathToScripts}/exp/playbook-flush.yaml
     sed -i "s/\(workload: \)".*"/workload: \"workloadLoad\"/" ${PathToScripts}/exp/playbook-flush.yaml
@@ -192,7 +197,7 @@ function backup {
     fi
 
     # Copy playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
     # Modify playbook
     sed -i "s/Scheme/${targetScheme}/g" ${PathToScripts}/exp/playbook-backup.yaml
     sed -i "s/DATAPATH/${expName}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}/g" ${PathToScripts}/exp/playbook-backup.yaml
@@ -213,7 +218,7 @@ function startupFromBackup {
     fi
 
     # Copy playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
     # Modify playbook
     sed -i "s/Scheme/${targetScheme}/g" ${PathToScripts}/exp/playbook-startup.yaml
     sed -i "s/DATAPATH/${expName}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}/g" ${PathToScripts}/exp/playbook-startup.yaml
@@ -223,7 +228,7 @@ function startupFromBackup {
 function failnodes {
     echo "Fail node for degraded test"
     # Copy playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
     # Modify playbook
     ansible-playbook -v -i ${PathToScripts}/exp/hosts.ini ${PathToScripts}/exp/playbook-fail.yaml
 }
@@ -254,7 +259,7 @@ function runExp {
     # Normal/Degraded Ops
 
     echo "Start running $workload on ${targetScheme} round $round"
-    setupNodeInfo hosts.ini
+    resetPlaybook
     # Modify run palybook
     if [ ${targetScheme} == "cassandra" ]; then
         sed -i "s/\(keyspace: \)".*"/keyspace: ycsbraw/" ${PathToScripts}/exp/playbook-run.yaml
@@ -373,7 +378,7 @@ function recovery {
     fi
 
     # Copy playbook
-    setupNodeInfo hosts.ini
+    resetPlaybook
 
     echo "Check failed nodes"
     # Variable to store the IPs under [elect_failure]

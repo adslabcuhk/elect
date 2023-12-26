@@ -14,7 +14,7 @@
       when: "'FAILED' in command_result.stderr"
     - name: Wait until killed server is found
       pause:
-        seconds: 60
+        seconds: 90
 
 - name: Stop CPU&Memory Monitor
   hosts: elect_failure
@@ -27,3 +27,6 @@
         . /etc/profile && bash PATH_TO_ELECT/scripts/status/killMonitor.sh
       register: command_result
       ignore_errors: true
+    - name: Wait until killed server is found after stopping CPU&Memory Monitor
+      pause:
+        seconds: 5

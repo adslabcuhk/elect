@@ -36,7 +36,7 @@
       fail: msg="the command failed"
       when: "'FAILED' in command_result.stderr"
 
-- name: Run Normal benchmark
+- name: Run benchmark
   hosts: elect_client
   become: yes
   become_user: elect
