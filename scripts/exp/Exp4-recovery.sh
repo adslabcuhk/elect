@@ -33,7 +33,7 @@ fi
 
 for scheme in "${schemes[@]}"; do
     for KVNumber in "${KVNumberSet[@]}"; do
-        bash "${PathToScripts}/count/fetchRecovery.sh" "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>"${PathToScripts}/exp/${ExpName}.log"
+        "${PathToScripts}/count/fetchRecovery.sh" "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>"${PathToScripts}/exp/${ExpName}.log"
     done
 done
 

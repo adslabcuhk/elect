@@ -8,10 +8,10 @@ ExpName="Exp0-simpleOverall"
 schemes=("elect" "cassandra")
 workloads=("workloadRead" "workloadWrite" "workloadScan" "workloadUpdate")
 runningTypes=("normal" "degraded")
-KVNumber=10000000
+KVNumber=6000000
 keyLength=24
 valueLength=1000
-operationNumber=1000000
+operationNumber=600000
 simulatedClientNumber=${defaultSimulatedClientNumber}
 RunningRoundNumber=5
 
@@ -62,7 +62,7 @@ done
 # output recovery cost
 echo "The full-node recovery time cost results:" >>${PathToScripts}/exp/${ExpName}.log
 for scheme in "${schemes[@]}"; do
-    bash "${PathToScripts}/count/fetchRecovery.sh" "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>"${PathToScripts}/exp/${ExpName}.log"
+    "${PathToScripts}/count/fetchRecovery.sh" "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>"${PathToScripts}/exp/${ExpName}.log"
 done
 # output resource usage
 echo "The resource usage evaluation results:" >>${PathToScripts}/exp/${ExpName}.log

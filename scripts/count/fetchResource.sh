@@ -2,7 +2,6 @@
 . /etc/profile
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/../common.sh"
-# PathToELECTResultSummary=${PathToScripts}/count/results
 
 expName=$1
 targetScheme=$2
@@ -230,7 +229,7 @@ function processResourceResultsForLoad {
             fi
         done
         combined_cpu_95th_percentile=$(calculate_combined_cpu_95th_percentile "${ith_files_CPU[@]}")
-        CPUUsageSumList+=($combined_cpu_95th_percentile)
+        CPUUsageSumList+=("$combined_cpu_95th_percentile")
         # DRAM usage
         declare -a ith_files_RAM=()
         for nodeID in "${!files_by_node[@]}"; do
@@ -242,7 +241,7 @@ function processResourceResultsForLoad {
             fi
         done
         combined_ram_95th_percentile=$(calculate_memory_95th_percentile "${ith_files_RAM[@]}")
-        RAMUsageSumList+=($combined_ram_95th_percentile)
+        RAMUsageSumList+=("$combined_ram_95th_percentile")
         # Disk IO usage
         nodeNumberForDiskIO=${#files_by_node[@]}
         declare -a ith_files_DISK=()
@@ -256,30 +255,30 @@ function processResourceResultsForLoad {
         done
         total_disk_io=()
         for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-            total_disk_io+=($(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_workloadLoad_Before-loading_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}-${targetScheme}-Load_workloadLoad_After-flush-compaction_disk_io_total.txt"))
+            total_disk_io+=("$(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_workloadLoad_Before-loading_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}-${targetScheme}-Load_workloadLoad_After-flush-compaction_disk_io_total.txt")")
         done
         total_disk_io_kib=("$(sumArray "${total_disk_io[@]}")")
         total_disk_io_gib=$(echo "scale=2; $total_disk_io_kib / 1048576" | bc -l)
-        DISKUsageSumList+=($total_disk_io_gib)
+        DISKUsageSumList+=("$total_disk_io_gib")
         # Network traffic
         total_network_traffic=()
         for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-            total_network_traffic+=($(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_workloadLoad_Before-loading_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}-${targetScheme}-Load_workloadLoad_After-flush-compaction_network_summary.txt"))
+            total_network_traffic+=("$(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_workloadLoad_Before-loading_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}-${targetScheme}-Load_workloadLoad_After-flush-compaction_network_summary.txt")")
         done
         total_network_traffic_bytes=("$(sumArray "${total_network_traffic[@]}")")
         total_network_traffic_gib=$(echo "scale=2; $total_network_traffic_bytes / 1048576 / 1024" | bc -l)
-        NETUsageSumList+=($total_network_traffic_gib)
+        NETUsageSumList+=("$total_network_traffic_gib")
     done
     # output
     echo -e "\033[1m\033[34m[Resource Usage during Load] scheme: ${targetScheme}, KVNumber: ${KVNumber}, KeySize: ${keylength}, ValueSize: ${fieldlength}\033[0m"
     echo -e "\033[31;1m95%-percentile CPU Usage (%):\033[0m"
-    calculate "${CPUUsageSumList[*]}"
+    calculate "${CPUUsageSumList[@]}"
     echo -e "\033[31;1m95%-percentile RAM Usage (GiB):\033[0m"
-    calculate "${RAMUsageSumList[*]}"
+    calculate "${RAMUsageSumList[@]}"
     echo -e "\033[31;1mTotal Disk I/O (GiB):\033[0m"
-    calculate "${DISKUsageSumList[*]}"
+    calculate "${DISKUsageSumList[@]}"
     echo -e "\033[31;1mTotal Network traffic (GiB):\033[0m"
-    calculate "${NETUsageSumList[*]}"
+    calculate "${NETUsageSumList[@]}"
 }
 
 function processResourceResultsForNormalOP {
@@ -332,7 +331,7 @@ function processResourceResultsForNormalOP {
                 fi
             done
             combined_cpu_95th_percentile=$(calculate_combined_cpu_95th_percentile "${ith_files_CPU[@]}")
-            roundLocalCPUUsageList+=($combined_cpu_95th_percentile)
+            roundLocalCPUUsageList+=("$combined_cpu_95th_percentile")
             # DRAM usage
             declare -a ith_files_RAM=()
             for nodeID in "${!files_by_node[@]}"; do
@@ -350,7 +349,7 @@ function processResourceResultsForNormalOP {
                 fi
             done
             combined_ram_95th_percentile=$(calculate_memory_95th_percentile "${ith_files_RAM[@]}")
-            roundLocalRAMUsageList+=($combined_ram_95th_percentile)
+            roundLocalRAMUsageList+=("$combined_ram_95th_percentile")
             # Disk IO usage
             nodeNumberForDiskIO=${#files_by_node[@]}
             declare -a ith_files_DISK=()
@@ -370,41 +369,40 @@ function processResourceResultsForNormalOP {
             done
             total_disk_io=()
             for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-                total_disk_io+=($(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_disk_io_total.txt"))
+                total_disk_io+=("$(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_disk_io_total.txt")")
             done
             total_disk_io_kib=("$(sumArray "${total_disk_io[@]}")")
             total_disk_io_gib=$(echo "scale=2; $total_disk_io_kib / 1048576" | bc -l)
-            roundLocalDISKUsageList+=($total_disk_io_gib)
+            roundLocalDISKUsageList+=("$total_disk_io_gib")
             # Network traffic
             total_network_traffic=()
             for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-                total_network_traffic+=($(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_network_summary.txt"))
+                total_network_traffic+=("$(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_network_summary.txt")")
             done
             total_network_traffic_bytes=("$(sumArray "${total_network_traffic[@]}")")
             total_network_traffic_gib=$(echo "scale=2; $total_network_traffic_bytes / 1048576 / 1024" | bc -l)
-            roundLocalNETUsageList+=($total_network_traffic_gib)
+            roundLocalNETUsageList+=("$total_network_traffic_gib")
         done
         # process each round
         average_CPU=$(calculate_average "${roundLocalCPUUsageList[@]}")
         average_RAM=$(calculate_average "${roundLocalRAMUsageList[@]}")
         average_DISK=$(calculate_average "${roundLocalDISKUsageList[@]}")
         average_NET=$(calculate_average "${roundLocalNETUsageList[@]}")
-        CPUUsageSumList+=($average_CPU)
-        RAMUsageSumList+=($average_RAM)
-        DISKUsageSumList+=($average_DISK)
-        NETUsageSumList+=($average_NET)
+        CPUUsageSumList+=("$average_CPU")
+        RAMUsageSumList+=("$average_RAM")
+        DISKUsageSumList+=("$average_DISK")
+        NETUsageSumList+=("$average_NET")
     done
-
     # output
     echo -e "\033[1m\033[34m[Resource usage with normal operations] scheme: ${targetScheme}, KVNumber: ${KVNumber}, KeySize: ${keylength}, ValueSize: ${fieldlength}, OPNumber: ${OPNumber}\033[0m"
     echo -e "\033[31;1m95%-percentile CPU Usage (%):\033[0m"
-    calculate "${CPUUsageSumList[*]}"
+    calculate "${CPUUsageSumList[@]}"
     echo -e "\033[31;1m95%-percentile RAM Usage (GiB):\033[0m"
-    calculate "${RAMUsageSumList[*]}"
+    calculate "${RAMUsageSumList[@]}"
     echo -e "\033[31;1mTotal Disk I/O (GiB):\033[0m"
-    calculate "${DISKUsageSumList[*]}"
+    calculate "${DISKUsageSumList[@]}"
     echo -e "\033[31;1mTotal Network traffic (GiB):\033[0m"
-    calculate "${NETUsageSumList[*]}"
+    calculate "${NETUsageSumList[@]}"
 }
 
 function processResourceResultsForDegradedOP {
@@ -457,7 +455,7 @@ function processResourceResultsForDegradedOP {
                 fi
             done
             combined_cpu_95th_percentile=$(calculate_combined_cpu_95th_percentile "${ith_files_CPU[@]}")
-            roundLocalCPUUsageList+=($combined_cpu_95th_percentile)
+            roundLocalCPUUsageList+=("$combined_cpu_95th_percentile")
             # DRAM usage
             declare -a ith_files_RAM=()
             for nodeID in "${!files_by_node[@]}"; do
@@ -475,7 +473,7 @@ function processResourceResultsForDegradedOP {
                 fi
             done
             combined_ram_95th_percentile=$(calculate_memory_95th_percentile "${ith_files_RAM[@]}")
-            roundLocalRAMUsageList+=($combined_ram_95th_percentile)
+            roundLocalRAMUsageList+=("$combined_ram_95th_percentile")
             # Disk IO usage
             nodeNumberForDiskIO=${#files_by_node[@]}
             declare -a ith_files_DISK=()
@@ -495,41 +493,41 @@ function processResourceResultsForDegradedOP {
             done
             total_disk_io=()
             for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-                total_disk_io+=($(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_disk_io_total.txt"))
+                total_disk_io+=("$(calculate_total_io_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_disk_io_total.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_disk_io_total.txt")")
             done
             total_disk_io_kib=("$(sumArray "${total_disk_io[@]}")")
             total_disk_io_gib=$(echo "scale=2; $total_disk_io_kib / 1048576" | bc -l)
-            roundLocalDISKUsageList+=($total_disk_io_gib)
+            roundLocalDISKUsageList+=("$total_disk_io_gib")
             # Network traffic
             total_network_traffic=()
             for nodeIndex in $(seq 0 $((nodeNumberForDiskIO - 1))); do
-                total_network_traffic+=($(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_network_summary.txt"))
+                total_network_traffic+=("$(calculate_network_usage_difference "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_Before-run_network_summary.txt" "${ith_files_DISK[nodeIndex]}/${expName}_${workload}_After-run_network_summary.txt")")
             done
             total_network_traffic_bytes=("$(sumArray "${total_network_traffic[@]}")")
             total_network_traffic_gib=$(echo "scale=2; $total_network_traffic_bytes / 1048576 / 1024" | bc -l)
-            roundLocalNETUsageList+=($total_network_traffic_gib)
+            roundLocalNETUsageList+=("$total_network_traffic_gib")
         done
         # process each round
         average_CPU=$(calculate_average "${roundLocalCPUUsageList[@]}")
         average_RAM=$(calculate_average "${roundLocalRAMUsageList[@]}")
         average_DISK=$(calculate_average "${roundLocalDISKUsageList[@]}")
         average_NET=$(calculate_average "${roundLocalNETUsageList[@]}")
-        CPUUsageSumList+=($average_CPU)
-        RAMUsageSumList+=($average_RAM)
-        DISKUsageSumList+=($average_DISK)
-        NETUsageSumList+=($average_NET)
+        CPUUsageSumList+=("$average_CPU")
+        RAMUsageSumList+=("$average_RAM")
+        DISKUsageSumList+=("$average_DISK")
+        NETUsageSumList+=("$average_NET")
     done
 
     # output
     echo -e "\033[1m\033[34m[Resource usage with degraded operations] scheme: ${targetScheme}, KVNumber: ${KVNumber}, KeySize: ${keylength}, ValueSize: ${fieldlength}, OPNumber: ${OPNumber}\033[0m"
     echo -e "\033[31;1m95%-percentile CPU Usage (%):\033[0m"
-    calculate "${CPUUsageSumList[*]}"
+    calculate "${CPUUsageSumList[@]}"
     echo -e "\033[31;1m95%-percentile RAM Usage (GiB):\033[0m"
-    calculate "${RAMUsageSumList[*]}"
+    calculate "${RAMUsageSumList[@]}"
     echo -e "\033[31;1mTotal Disk I/O (GiB):\033[0m"
-    calculate "${DISKUsageSumList[*]}"
+    calculate "${DISKUsageSumList[@]}"
     echo -e "\033[31;1mTotal Network traffic (GiB):\033[0m"
-    calculate "${NETUsageSumList[*]}"
+    calculate "${NETUsageSumList[@]}"
 }
 
 if [ "${outputType}" == "Load" ]; then

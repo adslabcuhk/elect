@@ -4,7 +4,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/../common.sh"
 
 # Fetch performance data from log files.
-# PathToELECTResultSummary=/home/tinoryj/Projects/ELECT/scripts/count/results/
 search_dir=$PathToELECTResultSummary
 fetchType=$1
 expName=$2
