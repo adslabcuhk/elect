@@ -16,7 +16,7 @@ We provide a testbed on the Chameleon cloud for the evaluation with an adequatel
 ```shell
 echo "${SSH-key-content}" > ~/.ssh/cc_rsa # Please replace the ${SSH-key-content} with the content of the SSH key that we provide on the HotCRP website.
 chmod 600 ~/.ssh/cc_rsa
-ssh -i ~/.ssh/cc_rsa cc@129.114.109.228
+ssh -i ~/.ssh/cc_rsa cc@129.114.108.181
 ```
 
 Alternatively, we provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. We will provide the account and password on the HotCRP website. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
