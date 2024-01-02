@@ -11,15 +11,15 @@ We claim that the results might differ from those in our paper due to various fa
 
 ## Testbed access
 
-We provide a testbed on the Chameleon cloud for the evaluation with an adequately set environment. The testbed contains 8 machines (6 ELECT server nodes, 1 object storage server node, and 1 client node). Since the repo will be made public, we will provide the connection key on the HotCRP website to ensure data security. You can access the testbed via the following command:
+We provide a testbed on the Chameleon cloud for the evaluation with an adequately set environment. The testbed contains 8 machines (6 ELECT server nodes, 1 object storage server node, and 1 client node). Since the repo will be made public, we will provide the connection key in the [Google doc](https://docs.google.com/document/d/17MhQdqkkl7gCqBG-EWxK2bc2TRHkrt1elJBqVQwpfGM/edit?usp=sharing) to ensure data security. You can access the testbed via the following command:
 
 ```shell
-echo "${SSH-key-content}" > ~/.ssh/cc_rsa # Please replace the ${SSH-key-content} with the content of the SSH key that we provide on the HotCRP website.
+echo "${SSH-key-content}" > ~/.ssh/cc_rsa # Please replace the ${SSH-key-content} with the content of the SSH key that we provided.
 chmod 600 ~/.ssh/cc_rsa
 ssh -i ~/.ssh/cc_rsa cc@129.114.108.181
 ```
 
-Alternatively, we provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. We will provide the account and password on the HotCRP website. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
+Alternatively, we provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
 
 ```shell
 ssh -p 2216 yjren@projgw.cse.cuhk.edu.hk
