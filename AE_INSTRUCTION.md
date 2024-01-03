@@ -19,6 +19,8 @@ chmod 600 ~/.ssh/cc_rsa
 ssh -i ~/.ssh/cc_rsa cc@129.114.108.181
 ```
 
+Note that the Chameleon Cloud may suffer from network congestion. If you encounter any network issues, please try again later. We will pose the status of the Chameleon Cloud in the [Google doc](https://docs.google.com/document/d/17MhQdqkkl7gCqBG-EWxK2bc2TRHkrt1elJBqVQwpfGM/edit?usp=sharing) if it encounters problems.
+
 Alternatively, we provide a testbed in our local cluster with a similar configuration (8 machines equipped with SSDs). It requires the use of the CSE department VPN (via [OpenVPN](https://www.cse.cuhk.edu.hk/misc/cse-account-password-vpn/)) to access the cluster. After downloading the OpenVPN and connecting to the CSE department VPN, you can access the cluster via the following command:
 
 ```shell

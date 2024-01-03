@@ -24,6 +24,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Stream;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -448,6 +449,7 @@ public class BigTableWriter extends SSTableWriter {
     class TransactionalProxy extends SSTableWriter.TransactionalProxy {
         // finalise our state on disk, including renaming
         private static final int contentSizeForGeneratingHash = 4 * 1024 * 1024;
+
         protected void doPrepare() {
             iwriter.prepareToCommit();
 
@@ -461,14 +463,15 @@ public class BigTableWriter extends SSTableWriter {
                 // descriptor.filenameFor(Component.DATA));
                 dataFileSize = new File(descriptor.filenameFor(Component.DATA)).length();
                 long fileLength = dataFileSize;
-                if(dataFileSize > contentSizeForGeneratingHash) {
+                if (dataFileSize > contentSizeForGeneratingHash) {
                     fileLength = contentSizeForGeneratingHash;
                 }
 
-                if(fileLength < 0 || fileLength > Integer.MAX_VALUE) {
-                    throw new IllegalStateException(String.format("ELECT-ERROR: The file length of sstable (%s) is negative (%s)", descriptor.filenameFor(Component.DATA), dataFileSize));
+                if (fileLength < 0 || fileLength > Integer.MAX_VALUE) {
+                    throw new IllegalStateException(
+                            String.format("ELECT-ERROR: The file length of sstable (%s) is negative (%s)",
+                                    descriptor.filenameFor(Component.DATA), dataFileSize));
                 }
-
 
                 byte[] bytes = new byte[(int) fileLength];
                 dataFileReadForHash.readFully(bytes);
@@ -493,9 +496,9 @@ public class BigTableWriter extends SSTableWriter {
                         }
                         hashID = sb.toString();
                     }
-
-                    // logger.debug("[ELECT]: generated hash value for current SSTable is {}, hash length is {}, file length is ({})", 
-                    //                 hashID, hashID.length(), dataFileSize);
+                    // logger.debug("[ELECT]: generated hash value for current SSTable is {}, hash
+                    // length is {}, file length is ({})",
+                    // hashID, hashID.length(), dataFileSize);
                 } catch (NoSuchAlgorithmException e) {
                     hashID = null;
                     logger.error("[ELECT-ERROR]: Could not generated hash value for current SSTable = {}",

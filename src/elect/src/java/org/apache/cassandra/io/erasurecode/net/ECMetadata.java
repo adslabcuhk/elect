@@ -462,11 +462,9 @@ public class ECMetadata implements Serializable {
     // return obj;
     // }
     public static void main(String[] args) throws Exception {
-        String ecMetadataFile = "./nb-627-big-EC.db";
+        String ecMetadataFile = "/home/tinoryj/nb-2004-big-EC.db";
         byte[] ecMetadataInBytes = ECNetutils.readBytesFromFile(ecMetadataFile);
         ECMetadataContent ecMetadata = (ECMetadataContent) ByteObjectConversion.byteArrayToObject(ecMetadataInBytes);
         logger.debug("ELECT-Debug: [Debug recovery] read ecmetadata ({}) for old sstable ({})", ecMetadata.stripeId);
-
     }
-
 }

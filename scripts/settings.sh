@@ -4,7 +4,7 @@
 NodesList=(10.31.0.184 10.31.0.182 10.31.0.189 10.31.0.187 10.31.0.180 10.31.0.183) # The IP addresses of the ELECT cluster nodes
 OSSServerNode="10.31.0.185" # The IP address of the OSS server node
 OSSServerPort=8000 # The port number of the OSS server node
-ClientNode="10.31.0.188" # The IP address of the client node (it can be the local node running the scripts)
+ClientNode="10.31.0.186" # The IP address of the client node (it can be the local node running the scripts)
 UserName="cc" # The user name of all the previous nodes
 sudoPasswd="" # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
 PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
