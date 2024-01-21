@@ -9,13 +9,13 @@ ELECT is a distributed tiered KV store that enables replication and erasure codi
 
 ## Artifact Evaluation Instructions
 
-Please refer to the [AE_INSTRUCTION.md](AE_INSTRUCTION.md) for details. We provide two testbeds with a settled system environment to run our evaluation scripts. Note that to ensure security, we will provide the connection key and specific connection method of the two testbeds on the HotCRP website.
+Please refer to the [AE_INSTRUCTION.md](AE_INSTRUCTION.md) for details.
 
 ## Prerequisites
 
 ### Testbed
 
-As a distributed KV store, ELECT requires a cluster of machines to run. With the default erasure coding parameters (i.e., [n,k]==[6,4]), ELECT requires a minimum of 6 machines as the storage nodes. In addition, to avoid unstable access to Alibaba OSS, we use a server node within the same cluster as the cold tier to store the cold data. We also need a client node to run the YCSB benchmark tool. Therefore, we need at least 8 machines to run the prototype. 
+As a distributed KV store, ELECT requires a cluster of machines to run. With the default erasure coding parameters (i.e., [n,k]==[6,4]), ELECT requires a minimum of 6 machines as the storage nodes. In addition, to avoid unstable access to Alibaba OSS, we use a server node within the same cluster as the cold tier to store the cold data. We also need a client node to run the YCSB benchmark tool. Therefore, we need at least 8 machines to run the prototype.
 
 ### Dependencies
 
