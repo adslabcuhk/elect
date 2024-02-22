@@ -7,6 +7,7 @@ OSSServerPort=8000 # The port number of the OSS server node
 ClientNode="10.31.0.186" # The IP address of the client node (it can be the local node running the scripts)
 UserName="cc" # The user name of all the previous nodes
 sudoPasswd="" # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
+PathToSSHPrivateKeyFile="/home/${UserName}/.ssh/id_rsa" # The path to the cluster SSH keys (Only used for Chameleon Cloud instance created with CC-* series system image); we assume all the nodes have the same path.
 PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
 PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup" # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
 PathToELECTLog="/home/${UserName}/ELECTLogs" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
@@ -18,7 +19,7 @@ PathToScripts="${PathToArtifact}/scripts"
 PathToColdTier="${PathToArtifact}/src/coldTier"
 
 NodeNumber="${#NodesList[@]}"
-SSTableSize=4
+SSTableSize=1 # Default is 4, change to 1 for BoF
 LSMTreeFanOutRatio=10
 concurrentEC=64
 defaultSimulatedClientNumber=16
