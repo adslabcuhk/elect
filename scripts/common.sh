@@ -336,6 +336,46 @@ function loadDataForEvaluation {
     done
 }
 
+function loadDataForBoFFastTest {
+    expName=$1
+    scheme=$2
+    KVNumber=$3
+    keylength=$4
+    fieldlength=$5
+    simulatedClientNumber=${6:-"${defaultSimulatedClientNumber}"}
+    storageSavingTarget=${7:-"0.6"}
+    codingK=${8:-"4"}
+    extraFlag=${9:-}
+
+    # Gen params
+    dataSizeOnEachNode=$(dataSizeEstimation ${KVNumber} ${keylength} ${fieldlength})
+    initialDelayTime=$(initialDelayEstimation ${dataSizeOnEachNode} ${scheme})
+    waitFlushCompactionTime=$(waitFlushCompactionTimeEstimation ${dataSizeOnEachNode} ${scheme})
+    treeLevels=$(treeSizeEstimation ${KVNumber} ${keylength} ${fieldlength})
+
+    # Outpout params
+    echo "Start experiment to Loading ${scheme}, expName is ${expName}; KVNumber is ${KVNumber}, keylength is ${keylength}, fieldlength is ${fieldlength}, simulatedClientNumber is ${simulatedClientNumber}, storageSavingTarget is ${storageSavingTarget}, codingK is ${codingK}, extraFlag is ${extraFlag}. Estimation of data size on each node is ${dataSizeOnEachNode} GiB, initial delay is ${initialDelayTime}, flush and compaction wait time is ${waitFlushCompactionTime}."
+    echo ""
+    estimatedTotalRunningTime=$(((${waitFlushCompactionTime} + ${KVNumber} / 20000) / 60))
+    echo "The total running time is estimated to be ${estimatedTotalRunningTime} minutes."
+
+    # Load
+    load "${expName}" "${scheme}" "${KVNumber}" "${keylength}" "${fieldlength}" "${simulatedClientNumber}" "${storageSavingTarget}" "${codingK}"
+    flush "${expName}" "${scheme}" "${waitFlushCompactionTime}"
+
+    ## Collect load logs
+    for nodeIP in "${NodesList[@]}"; do
+        echo "Copy loading stats of loading for ${expName}-${targetScheme} back, current working on node ${nodeIP}"
+        if [ ! -d ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP} ]; then
+            mkdir -p ${PathToELECTLog}/${targetScheme}/${ExpName}-Load-${nodeIP}
+        fi
+        scp -r ${UserName}@${nodeIP}:${PathToELECTLog} ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-Load-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-Node-${nodeIP}-Time-$(date +%s)
+        ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTLog}'; mkdir -p '${PathToELECTLog}'"
+        ssh ${UserName}@${OSSServerNode} "du -s --bytes ${PathToColdTier}/data > ${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log"
+        scp ${UserName}@${OSSServerNode}:${PathToELECTLog}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log ${PathToELECTResultSummary}/${targetScheme}/${ExpName}-${targetScheme}-KVNumber-${KVNumber}-KeySize-${keylength}-ValueSize-${fieldlength}-CodingK-${codingK}-Saving-${storageSavingTarget}-OSSStorage.log
+    done
+}
+
 function doEvaluation {
     expName=$1
     scheme=$2
@@ -418,7 +458,7 @@ function recovery {
 }
 
 function cleanUp {
-     for nodeIP in "${NodesList[@]}"; do
+    for nodeIP in "${NodesList[@]}"; do
         echo "Delete old DB backup to free storage sapce, current working on node ${nodeIP}"
         ssh ${UserName}@${nodeIP} "rm -rf '${PathToELECTExpDBBackup}'; mkdir -p '${PathToELECTExpDBBackup}'"
     done

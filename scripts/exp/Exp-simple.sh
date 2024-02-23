@@ -6,7 +6,7 @@ source "${SCRIPT_DIR}/../common.sh"
 
 ExpName="Exp-simple"
 schemes=("elect")
-KVNumber=300000
+KVNumber=240000
 keyLength=24
 valueLength=1000
 simulatedClientNumber=${defaultSimulatedClientNumber}
@@ -17,7 +17,7 @@ setupNodeInfo ./hosts.ini
 for scheme in "${schemes[@]}"; do
     echo "Start experiment of ${scheme}"
     # Load data for evaluation
-    loadDataForEvaluation "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${simulatedClientNumber}"
+    loadDataForBoFFastTest "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" "${simulatedClientNumber}"
 done
 
 # Generate the summarized results
@@ -25,6 +25,10 @@ if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
     rm -rf "${PathToScripts}/exp/${ExpName}.log"
 fi
 # output storage usage
+
+dataSizeEstimation=$(echo "scale=2; $KVNumber * ($keyLength + $valueLength)  1024 / 1024 / 1024 * 3" | bc)
+echo "The estimated storage overhead (with 3-way replication):" >>${PathToScripts}/exp/${ExpName}.log
+echo "${dataSizeEstimation} GiB" >>${PathToScripts}/exp/${ExpName}.log
 echo "The storage overhead results:" >>${PathToScripts}/exp/${ExpName}.log
 for scheme in "${schemes[@]}"; do
     echo "Storage usage of ${scheme}" >>${PathToScripts}/exp/${ExpName}.log
