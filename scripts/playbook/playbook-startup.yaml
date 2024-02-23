@@ -34,7 +34,7 @@
       when: "'FAILED' in command_result.stderr"
     - name: Wait until cold startup is done
       pause:
-        seconds: 90
+        seconds: 60
 
 - name: Setup log levels
   hosts: elect_servers

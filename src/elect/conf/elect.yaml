@@ -658,7 +658,7 @@ concurrent_materialized_view_writes: 64
 # and will trigger a flush based on memtable_cleanup_threshold
 # If omitted, Cassandra will set both to 1/4 the size of the heap.
 # Min unit: MiB
-memtable_heap_space: 2048MiB
+memtable_heap_space: 200MiB
 # # Min unit: MiB
 # memtable_offheap_space: 2048MiB
 

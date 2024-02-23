@@ -20,7 +20,7 @@ PathToColdTier="${PathToArtifact}/src/coldTier"
 
 NodeNumber="${#NodesList[@]}"
 SSTableSize=1 # Default is 4, change to 1 for BoF
-LSMTreeFanOutRatio=10
+LSMTreeFanOutRatio=4
 concurrentEC=$((64 * 4 / $SSTableSize))
 defaultSimulatedClientNumber=16
 

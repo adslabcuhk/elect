@@ -14,7 +14,7 @@
       when: "'FAILED' in command_result.stderr"
     - name: Wait until killed server is found
       pause:
-        seconds: 90
+        seconds: 60
 
 - name: Stop CPU&Memory Monitor
   hosts: elect_failure

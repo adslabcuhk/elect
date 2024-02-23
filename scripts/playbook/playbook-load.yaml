@@ -40,7 +40,7 @@
       when: "'FAILED' in command_result.stderr"
     - name: Wait until all KVS nodes are ready
       pause:
-        seconds: 90
+        seconds: 60
 
 - name: Setup log levels
   hosts: elect_servers
