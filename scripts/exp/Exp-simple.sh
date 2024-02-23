@@ -10,6 +10,7 @@ KVNumber=240000
 keyLength=24
 valueLength=1000
 simulatedClientNumber=${defaultSimulatedClientNumber}
+dataSizeEstimation=$(echo "scale=2; $KVNumber * ($keyLength + $valueLength) / 1024 / 1024 / 1024 * 3 * 1.75" | bc)
 
 # Setup hosts
 setupNodeInfo ./hosts.ini
@@ -25,11 +26,8 @@ if [ -f "${PathToScripts}/exp/${ExpName}.log" ]; then
     rm -rf "${PathToScripts}/exp/${ExpName}.log"
 fi
 # output storage usage
-
-dataSizeEstimation=$(echo "scale=2; $KVNumber * ($keyLength + $valueLength)  1024 / 1024 / 1024 * 3" | bc)
-echo "The estimated storage overhead (with 3-way replication):" >>${PathToScripts}/exp/${ExpName}.log
-echo "${dataSizeEstimation} GiB" >>${PathToScripts}/exp/${ExpName}.log
 echo "The storage overhead results:" >>${PathToScripts}/exp/${ExpName}.log
+echo "The estimated storage overhead (with 3-way replication, include metadata and Cassandra Logs): ${dataSizeEstimation} GiB" >>${PathToScripts}/exp/${ExpName}.log
 for scheme in "${schemes[@]}"; do
     echo "Storage usage of ${scheme}" >>${PathToScripts}/exp/${ExpName}.log
     ${PathToScripts}/count/fetchStorage.sh "${ExpName}" "${scheme}" "${KVNumber}" "${keyLength}" "${valueLength}" >>${PathToScripts}/exp/${ExpName}.log
