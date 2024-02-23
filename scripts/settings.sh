@@ -2,16 +2,16 @@
 . /etc/profile
 # Common params for all experiments
 NodesList=(10.31.0.184 10.31.0.182 10.31.0.189 10.31.0.187 10.31.0.180 10.31.0.183) # The IP addresses of the ELECT cluster nodes
-OSSServerNode="10.31.0.185" # The IP address of the OSS server node
-OSSServerPort=8000 # The port number of the OSS server node
-ClientNode="10.31.0.186" # The IP address of the client node (it can be the local node running the scripts)
-UserName="cc" # The user name of all the previous nodes
-sudoPasswd="" # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
-PathToSSHPrivateKeyFile="/home/${UserName}/.ssh/id_rsa" # The path to the cluster SSH keys (Only used for Chameleon Cloud instance created with CC-* series system image); we assume all the nodes have the same path.
-PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
-PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup" # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
-PathToELECTLog="/home/${UserName}/ELECTLogs" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
-PathToELECTResultSummary="/home/${UserName}/ELECTResults" # The path to the result summary folder for storing the final experiment results; we assume all the nodes have the same path. 
+OSSServerNode="10.31.0.185"                                                         # The IP address of the OSS server node
+OSSServerPort=8000                                                                  # The port number of the OSS server node
+ClientNode="10.31.0.186"                                                            # The IP address of the client node (it can be the local node running the scripts)
+UserName="cc"                                                                       # The user name of all the previous nodes
+sudoPasswd=""                                                                       # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
+PathToSSHPrivateKeyFile="/home/${UserName}/.ssh/id_rsa"                             # The path to the cluster SSH keys (Only used for Chameleon Cloud instance created with CC-* series system image); we assume all the nodes have the same path.
+PathToArtifact="/home/${UserName}/ELECT"                                            # The path to the artifact folder; we assume all the nodes have the same path.
+PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup"                         # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
+PathToELECTLog="/home/${UserName}/ELECTLogs"                                        # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
+PathToELECTResultSummary="/home/${UserName}/ELECTResults"                           # The path to the result summary folder for storing the final experiment results; we assume all the nodes have the same path.
 
 PathToELECTPrototype="${PathToArtifact}/src/elect"
 PathToYCSB="${PathToArtifact}/scripts/ycsb"
@@ -21,7 +21,7 @@ PathToColdTier="${PathToArtifact}/src/coldTier"
 NodeNumber="${#NodesList[@]}"
 SSTableSize=1 # Default is 4, change to 1 for BoF
 LSMTreeFanOutRatio=10
-concurrentEC=64
+concurrentEC=$((64 * 4 / $SSTableSize))
 defaultSimulatedClientNumber=16
 
 NodesList=($(printf "%s\n" "${NodesList[@]}" | sort -V))

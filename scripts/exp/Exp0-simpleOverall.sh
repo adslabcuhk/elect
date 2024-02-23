@@ -2,7 +2,7 @@
 . /etc/profile
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/../common.sh"
-# Exp2: YCSB core workloads, 3-way replication, (6,4) encoding, 60% target storage saving, 10M KV + 1M OP.
+# Exp0: YCSB core workloads, 3-way replication, (6,4) encoding, 60% target storage saving, 10M KV + 1M OP.
 
 ExpName="Exp0-simpleOverall"
 schemes=("elect" "cassandra")
